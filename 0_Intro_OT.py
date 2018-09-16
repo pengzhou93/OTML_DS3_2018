@@ -125,6 +125,26 @@ gamma = ot.emd(bakery_prod_norm, cafe_prod_norm, M)
 # 
 # In order to make it more interpretable one can also use the ```alpha``` parameter of plot and set it to ```alpha=G[i,j]/G[i,j].max()```. 
 
+# In[31]:
+
+
+G = gamma * bakery_prod.sum()
+thr=0.1
+mx=G.max()
+pl.figure(5,(8,7))
+pl.clf()
+pl.imshow(Imap,interpolation='bilinear') # plot the map
+pl.scatter(bakery_pos[:,0],bakery_pos[:,1],s=bakery_prod,c='r', edgecolors='k',label='Bakeries')
+pl.scatter(cafe_pos[:,0],cafe_pos[:,1],s=cafe_prod,c='b', edgecolors='k',label='Cafés')
+for i in range(G.shape[0]):
+    for j in range(G.shape[1]):
+        if G[i,j]>thr:
+            pl.plot([bakery_pos[i,0],cafe_pos[j,0]],[bakery_pos[i,1],cafe_pos[j,1]],'k',alpha=G[i,j]/mx)
+        
+pl.legend()
+pl.title('Transport between Bakeries and Cafés');
+
+
 # #### OT loss and dual variables
 # 
 # The resulting wasserstein loss loss is of the form:
@@ -151,3 +171,64 @@ W
 # 
 # Be carefull to numerical problems. A good pre-provcessing for Sinkhorn is to divide the cost matrix ```C```
 #  by its maximum value.
+
+# In[33]:
+
+
+C = M
+
+reg=1e-2
+
+C0=C/C.max()
+
+#G0=ot.sinkhorn(bakery_prod,cafe_prod,C0,reg)
+
+K=np.exp(-C0/reg)
+G=K
+niter=100
+u=np.ones(C.shape[0])
+for i in range(niter):
+    v=cafe_prod/K.T.dot(u)
+    u=bakery_prod/K.dot(v)
+G=u[:,None]*K*v[None,:]
+
+loss=np.sum(C*G)
+
+
+
+pl.figure(4,(14,7))
+
+pl.subplot(1,2,1)
+pl.imshow(C);
+pl.xlabel('Cafés')
+pl.ylabel('Bakeries')
+pl.title('Cost matrix')
+pl.colorbar();
+
+
+pl.subplot(1,2,2)
+pl.imshow(G);
+pl.xlabel('Cafés')
+pl.ylabel('Bakeries')
+pl.title('OT matrix')
+pl.colorbar();
+
+
+thr=0.1
+mx=G.max()
+pl.figure(5,(8,7))
+pl.clf()
+pl.imshow(Imap,interpolation='bilinear') # plot the map
+pl.scatter(bakery_pos[:,0],bakery_pos[:,1],s=bakery_prod,c='r', edgecolors='k',label='Bakeries')
+pl.scatter(cafe_pos[:,0],cafe_pos[:,1],s=cafe_prod,c='b', edgecolors='k',label='Cafés')
+for i in range(G.shape[0]):
+    for j in range(G.shape[1]):
+        if G[i,j]>thr:
+            pl.plot([bakery_pos[i,0],cafe_pos[j,0]],[bakery_pos[i,1],cafe_pos[j,1]],'k',alpha=G[i,j]/mx)
+        
+pl.legend()
+pl.title('Transport between Bakeries and Cafés');
+#np.abs(G-G2).max()
+
+loss
+

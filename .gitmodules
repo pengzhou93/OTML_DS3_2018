@@ -1,0 +1,3 @@
+[submodule "POT"]
+	path = POT
+	url = https://github.com/pengzhou93/POT.git

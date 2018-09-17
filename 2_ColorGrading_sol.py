@@ -10,7 +10,7 @@
 # First we need to load two images. To this end we need some packages
 # 
 
-# In[1]:
+# In[2]:
 
 
 import numpy as np
@@ -24,7 +24,7 @@ I2 = imread('./data/schiele.jpg').astype(np.float64) / 256
 
 # We need some code to visualize them
 
-# In[2]:
+# In[3]:
 
 
 def showImage(I,myPreferredFigsize=(8,8)):
@@ -35,7 +35,7 @@ def showImage(I,myPreferredFigsize=(8,8)):
     pl.show()
 
 
-# In[3]:
+# In[4]:
 
 
 showImage(I1)
@@ -46,7 +46,7 @@ showImage(I2)
 
 # Write two functions that will be used to convert 2D images as arrays of 3D points (in the color space), and back.
 
-# In[4]:
+# In[5]:
 
 
 def im2mat(I):
@@ -64,7 +64,7 @@ X2 = im2mat(I2)
 
 # It is unlikely that our solver, as efficient it can be, can handle so large distributions (1Mx1M for the coupling). We will use the Mini batch k-means procedure from sklearn to subsample those distributions. Write the code that performs this subsampling (you can choose a size of 1000 clusters to have a good approximation of the image)
 
-# In[5]:
+# In[6]:
 
 
 import sklearn.cluster as skcluster
@@ -77,7 +77,7 @@ Xt = clust2.cluster_centers_
 
 # You can use the following procedure to display them as point clouds
 
-# In[6]:
+# In[7]:
 
 
 def showImageAsPointCloud(X,myPreferredFigsize=(8,8)):
@@ -97,7 +97,7 @@ def showImageAsPointCloud(X,myPreferredFigsize=(8,8)):
     pl.show()
 
 
-# In[7]:
+# In[8]:
 
 
 showImageAsPointCloud(Xs)
@@ -106,7 +106,7 @@ showImageAsPointCloud(Xt)
 
 # You can now compute the coupling between those two distributions using the exact LP solver (EMD)
 
-# In[8]:
+# In[9]:
 
 
 import ot
@@ -119,7 +119,7 @@ G = ot.emd(mu_s,mu_t, M)
 
 # using the barycentric mapping method, express the tansformation of both images into the other one
 
-# In[9]:
+# In[10]:
 
 
 newXs=nbsamples*G.dot(Xt)
@@ -134,7 +134,7 @@ showImageAsPointCloud(newXt)
 
 # Express this transformation in your code, and display the corresponding adapted image.
 
-# In[ ]:
+# In[11]:
 
 
 newX1 = newXs[clust1.predict(X1),:]
@@ -147,7 +147,7 @@ showImage(mat2im(newX2,I2.shape))
 # You can use also the entropy regularized version of Optimal Transport (a.k.a. the Sinkhorn algorithm) to explore the impact of regularization on the final result
 # 
 
-# In[ ]:
+# In[12]:
 
 
 for reg in np.logspace(-3,0,4):

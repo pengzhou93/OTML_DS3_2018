@@ -101,7 +101,28 @@ then
 #    ./run.sh "2_ColorGrading_sol.ipynb" jupyter
 
     file="2_ColorGrading_sol.py"
-    line=22
+    line=20
+    if [ $2 = debug ]
+    then
+        insert_debug_string "$file" $line "$debug_str"
+        python "$file"
+        delete_debug_string "$file" $line "$debug_str"
+
+    elif [ $2 = jupyter ]
+    then
+        jupyter notebook --browser google-chrome
+
+    else
+        python $file
+    fi
+
+elif [ "$1" = "3_WGAN_sol.ipynb" ]
+then
+#    ./run.sh "3_WGAN_sol.ipynb" debug
+#    ./run.sh "3_WGAN_sol.ipynb" jupyter
+
+    file="3_WGAN_sol.py"
+    line=40
     if [ $2 = debug ]
     then
         insert_debug_string "$file" $line "$debug_str"

@@ -19,7 +19,7 @@
 # First we import the relevant modules. Note that you will need ```sklearn``` to learn the Support Vector Machine cleassifier and to projet the data with TSNE.
 # 
 
-# In[3]:
+# In[4]:
 
 
 import numpy as np # always need it
@@ -36,7 +36,7 @@ import ot
 # 
 # Note that every line in the ```xs``` and ```xt``` is a 28x28 image.
 
-# In[4]:
+# In[5]:
 
 
 data=np.load('data/mnist_usps.npz')
@@ -59,7 +59,7 @@ nt=xt.shape[0]
 # 
 # 
 
-# In[5]:
+# In[6]:
 
 
 
@@ -100,7 +100,7 @@ pl.gcf().subplots_adjust(top=0.95)
 # 
 # We learn a classifier on the MNIST dataset (we will not be state of the art on 1000 samples). We evaluate this claddifier on MNIST and on the USPS dataset.
 
-# In[6]:
+# In[7]:
 
 
 
@@ -124,7 +124,7 @@ print('ACC_USPS={:1.3f}'.format(ACC_USPS))
 # 
 # 
 
-# In[7]:
+# In[8]:
 
 
 
@@ -137,7 +137,7 @@ xps=xp[:ns,:]
 xpt=xp[ns:,:]
 
 
-# In[6]:
+# In[9]:
 
 
 
@@ -167,16 +167,56 @@ pl.title('TSNE Embedding of the Source/Target data');
 # 
 # 
 
+# In[10]:
+
+
+
+C=ot.dist(xs,xt)
+
+pl.figure(4,(10,10))
+pl.imshow(C)
+pl.title('Cost matrix');
+
+
 # We can clearly see the (noisy) structure in the matrix. It is also interesting to note that the class 1 in usps (second column) is particularly different fromm all the other classes in MNIST data (even class 1).
 # 
 # 
 # Next we compute the OT matrix using exact LP OT [ot.emd](http://pot.readthedocs.io/en/stable/all.html#ot.emd) or regularized OT with  [ot.sinkhorn](http://pot.readthedocs.io/en/stable/all.html#ot.sinkhorn).
+
+# In[11]:
+
+
+G=ot.emd(ot.unif(ns),ot.unif(nt),C)
+
+reg=.5e-4
+#G=ot.sinkhorn(ot.unif(ns),ot.unif(nt),C,reg)
+
+pl.figure(5,(10,10))
+pl.imshow(G,interpolation='bilinear',vmax=G.max()/10)
+pl.title('OT matrix');
+
 
 # We can see that most of the trasportation is done in the block-diagonal which means that in average samples from one class are affected to the proper classs in the target.
 # 
 # #### 2/3 Mapping + Classification
 # 
 # Now we perform the barycentric mapping of the samples and traing the classifier on the mapped samples. We recomend to use a smaller ```gamma=1e1``` here because some samples will be mislabeled and a smooth classifier will work better.
+
+# In[12]:
+
+
+xst=ns*G.dot(xt)
+
+clf=SVC(C=1,gamma=1e1)
+
+clf.fit(xst,ys)
+
+ACC_USPS2=clf.score(xt,yt)
+
+print('ACC_MNIST={:1.3f}'.format(ACC_MNIST))
+print('ACC_USPS={:1.3f}'.format(ACC_USPS))
+print('ACC_USPS2={:1.3f}'.format(ACC_USPS2))
+
 
 # We can see that the adaptation with EMD leads to a performance gain of nearly 10%. You can get even better performances using entropic regularized OT or group lasso regularization.
 # 
@@ -186,10 +226,29 @@ pl.title('TSNE Embedding of the Source/Target data');
 # 
 # 
 
-# In[ ]:
+# In[13]:
 
 
 
+xtot=np.concatenate((xst,xt),axis=0)
+
+xp=TSNE().fit_transform(xtot)
+
+xps=xp[:ns,:]
+xpt=xp[ns:,:]
+
+
+# In[16]:
+
+
+
+pl.figure(6,(12,10))
+
+pl.scatter(xpt[:,0],xpt[:,1],c=yt,marker='+',cmap='tab10',label='Target data')
+pl.scatter(xps[:,0],xps[:,1],c=ys,marker='o',cmap='tab10',label='Source data')
+pl.legend()
+pl.colorbar()
+pl.title('TSNE Embedding of the OT Adapted Source/Target data');
 
 
 # We can see that when using emd solver the OT matrix is a permutation wo the samples are exactly superimposed. In average the classes are also well transported but there exist a number of badly transported samples that have a class permutation.
@@ -198,6 +257,19 @@ pl.title('TSNE Embedding of the Source/Target data');
 # #### Transported sampels vizualization
 # 
 # We can now also plot the transported samples.
+
+# In[12]:
+
+
+# Fisrt we plot MNIST
+pl.figure(1,(nb,nb))
+for i in range(nb*nb):
+    pl.subplot(nb,nb,1+i)
+    c=i%nb
+    plot_image(xst[np.where(ys==c)[0][i//nb],:])
+pl.gcf().suptitle("Transported MNIST", fontsize=20);
+pl.gcf().subplots_adjust(top=0.95)
+
 
 # Those are the same MNIST samples that have been plotted above but after trasnportation. There are several samples that are transported on the wrong class but again in average the class information is preserved which explain the accuracy gain.
 # 

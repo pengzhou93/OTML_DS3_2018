@@ -74,5 +74,46 @@ then
         python $file
     fi
 
+elif [ "$1" = "1_DomainAdaptation_sol.ipynb" ]
+then
+#    ./run.sh "1_DomainAdaptation_sol.ipynb" debug
+#    ./run.sh "1_DomainAdaptation_sol.ipynb" jupyter
+
+    file="1_DomainAdaptation_sol.py"
+    line=22
+    if [ $2 = debug ]
+    then
+        insert_debug_string "$file" $line "$debug_str"
+        python "$file"
+        delete_debug_string "$file" $line "$debug_str"
+
+    elif [ $2 = jupyter ]
+    then
+        jupyter notebook --browser google-chrome
+
+    else
+        python $file
+    fi
+
+elif [ "$1" = "2_ColorGrading_sol.ipynb" ]
+then
+#    ./run.sh "2_ColorGrading_sol.ipynb" debug
+#    ./run.sh "2_ColorGrading_sol.ipynb" jupyter
+
+    file="2_ColorGrading_sol.py"
+    line=22
+    if [ $2 = debug ]
+    then
+        insert_debug_string "$file" $line "$debug_str"
+        python "$file"
+        delete_debug_string "$file" $line "$debug_str"
+
+    elif [ $2 = jupyter ]
+    then
+        jupyter notebook --browser google-chrome
+
+    else
+        python $file
+    fi
 
 fi
